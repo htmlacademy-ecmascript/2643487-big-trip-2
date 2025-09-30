@@ -3,31 +3,30 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  // Точка входа
   entry: './src/main.js',
   
-  // Настройка выходного файла
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js',
     clean: true,
   },
   
-  // Генерация source-maps
+  resolve: {
+    extensions: ['.js', '.json', '.css']
+  },
+  
   devtool: 'source-map',
   
-  // Настройка devServer
   devServer: {
     static: {
       directory: path.join(__dirname, 'build'),
     },
     compress: true,
     port: 8080,
-    hot: true, // Горячая перезагрузка
-    open: true, // Автоматическое открытие браузера
+    hot: true,
+    open: true,
   },
   
-  // Настройка модулей
   module: {
     rules: [
       {
@@ -36,7 +35,15 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env']
+            presets: [
+              ['@babel/preset-env', {
+                targets: {
+                  browsers: ['last 2 versions', 'ie >= 11']
+                },
+                useBuiltIns: 'entry',
+                corejs: 3
+              }]
+            ]
           }
         }
       },
@@ -47,7 +54,6 @@ module.exports = {
     ]
   },
   
-  // Плагины
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html'

@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Денис Горбунов](https://up.htmlacademy.ru/ecmascript-individual/2/user/2643487).
-* Наставник: `Неизвестно`.
+* Наставник: [`Евгений Лепешкин`] (https://htmlacademy.ru/profile/spearance).
 
 ---
 

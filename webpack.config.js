@@ -10,11 +10,22 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js',
-    clean: true, // Очистка директории перед новой сборкой
+    clean: true,
   },
   
   // Генерация source-maps
   devtool: 'source-map',
+  
+  // Настройка devServer
+  devServer: {
+    static: {
+      directory: path.join(__dirname, 'build'),
+    },
+    compress: true,
+    port: 8080,
+    hot: true, // Горячая перезагрузка
+    open: true, // Автоматическое открытие браузера
+  },
   
   // Настройка модулей
   module: {
@@ -38,19 +49,16 @@ module.exports = {
   
   // Плагины
   plugins: [
-    // Копирование HTML файлов
     new HtmlWebpackPlugin({
       template: './public/index.html'
     }),
     
-    // Копирование статических файлов из public в build
     new CopyWebpackPlugin({
       patterns: [
         {
           from: 'public',
           to: '',
           filter: (resourcePath) => {
-            // Не копируем HTML файлы, так как ими управляет HtmlWebpackPlugin
             return !resourcePath.endsWith('.html');
           }
         }

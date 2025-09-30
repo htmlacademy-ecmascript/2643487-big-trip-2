@@ -7,7 +7,7 @@ module.exports = {
   
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'bundle.js',
+    filename: 'bundle.[contenthash].js', // Добавляем contenthash
     clean: true,
   },
   
@@ -55,17 +55,33 @@ module.exports = {
   },
   
   plugins: [
+    // Настройка HtmlWebpackPlugin
     new HtmlWebpackPlugin({
-      template: './public/index.html'
+      template: './public/index.html',
+      filename: 'index.html',
+      inject: 'body', // Вставляем скрипты в конец body
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeRedundantAttributes: true,
+        useShortDoctype: true,
+        removeEmptyAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        keepClosingSlash: true,
+        minifyJS: true,
+        minifyCSS: true,
+        minifyURLs: true,
+      }
     }),
     
+    // Обновляем CopyWebpackPlugin - исключаем index.html
     new CopyWebpackPlugin({
       patterns: [
         {
           from: 'public',
           to: '',
-          filter: (resourcePath) => {
-            return !resourcePath.endsWith('.html');
+          globOptions: {
+            ignore: ['**/index.html'] // Игнорируем index.html
           }
         }
       ]

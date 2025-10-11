@@ -1,7 +1,19 @@
 import { createElement } from '../render.js';
 
-function createEditPointFormTemplate(point, destinations, offersByType) {
+function formatInputDate(dateString) {
+  if (!dateString) {
+    return '';
+  }
+  const date = new Date(dateString);
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yy = String(date.getFullYear()).slice(-2);
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${dd}/${mm}/${yy} ${hh}:${min}`;
+}
 
+function createEditPointFormTemplate(point, destinations, offersByType) {
   if (!point) {
     return '<form class="event event--edit"></form>';
   }
@@ -10,14 +22,10 @@ function createEditPointFormTemplate(point, destinations, offersByType) {
   const destinationObj = safeDestinations.find((dest) => dest.id === point.destination);
   const allOffersForType = safeOffersByType.find((o) => o.type === point.type)?.offers || [];
   const selectedOffers = point.offers || [];
-
-
   const eventTypes = offersByType.map(({type}) => type);
-
-
   const destinationOptions = safeDestinations.map((dest) => `<option value="${dest.name}"></option>`).join('');
-
-
+  const startInputValue = formatInputDate(point.dateFrom);
+  const endInputValue = formatInputDate(point.dateTo);
   const offersSection = allOffersForType.length ? `
     <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -34,8 +42,6 @@ function createEditPointFormTemplate(point, destinations, offersByType) {
       </div>
     </section>
   ` : '';
-
-
   const destinationSection = destinationObj ? `
     <section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
@@ -47,14 +53,11 @@ function createEditPointFormTemplate(point, destinations, offersByType) {
         </div>
       </div>` : ''}
     </section>` : '';
-
-
   const eventTypesMarkup = eventTypes.map((type) => `
     <div class="event__type-item">
       <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}"${type === point.type ? ' checked' : ''}>
       <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type.charAt(0).toUpperCase() + type.slice(1)}</label>
     </div>`).join('');
-
   return `
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
@@ -80,10 +83,10 @@ function createEditPointFormTemplate(point, destinations, offersByType) {
         </div>
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startInputValue}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endInputValue}">
         </div>
         <div class="event__field-group  event__field-group--price">
           <label class="event__label" for="event-price-1">

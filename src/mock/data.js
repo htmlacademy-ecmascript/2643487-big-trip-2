@@ -1,8 +1,8 @@
 
 const DESTINATION_COUNT = 6;
-const MAX_PHOTOS_PER_DEST = 4;
+const MAX_PHOTOS_PER_DEST = 6;
 const MIN_PHOTOS_PER_DEST = 2;
-const POINTS_COUNT = 16;
+const POINTS_COUNT = 4;
 const DAYS_RANGE_BEFORE = 5; // дней назад
 const DAYS_RANGE_AFTER = 5; // дней вперёд
 const MAX_POINT_DURATION_HOURS = 24;

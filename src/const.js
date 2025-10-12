@@ -2,13 +2,13 @@
 export const DESTINATION_COUNT = 6;
 export const MAX_PHOTOS_PER_DEST = 4;
 export const MIN_PHOTOS_PER_DEST = 1;
-export const POINTS_COUNT = 16;
+export const POINTS_COUNT = 3;
 export const DAYS_RANGE_BEFORE = 5;
 export const DAYS_RANGE_AFTER = 5;
 export const MAX_POINT_DURATION_HOURS = 24;
 export const MIN_POINT_PRICE = 50;
 export const MAX_POINT_PRICE = 1000;
-export const OFFERS_PER_POINT_MAX = 2;
+export const OFFERS_PER_POINT_MAX = 5;
 export const PHOTOS_POOL_COUNT = 5;
 export const MS_IN_DAY = 24 * 60 * 60 * 1000;
 export const MS_IN_HOUR = 60 * 60 * 1000;

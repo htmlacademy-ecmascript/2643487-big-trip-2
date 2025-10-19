@@ -1,10 +1,10 @@
-import { render, RenderPosition } from '../render.js';
+import { render, RenderPosition, replace } from '../render.js';
 import FilterView from '../view/filter-view.js';
 import SortView from '../view/sort-view.js';
-import AddPointFormView from '../view/add-point-form-view.js';
-import EditPointFormView from '../view/edit-point-form-view.js';
 import PointView from '../view/point-view.js';
+import EditPointFormView from '../view/edit-point-form-view.js';
 import PointsListView from '../view/points-list-view.js';
+import { escKeyDownHandler } from '../utils/dom-utils.js';
 
 export default class TripPresenter {
   constructor({ filterContainer, sortContainer, model }) {
@@ -12,6 +12,8 @@ export default class TripPresenter {
     this.sortContainer = sortContainer;
     this.model = model;
     this.pointsListComponent = new PointsListView();
+    this.editComponent = null;
+    this.pointComponent = null;
   }
 
   init() {
@@ -23,26 +25,45 @@ export default class TripPresenter {
     const destinations = this.model.getDestinations();
     const offersByType = this.model.getOffersByType();
 
-    if (points.length > 0) {
-      render(
-        new EditPointFormView(points[0], destinations, offersByType),
-        this.pointsListComponent.getElement()
-      );
+    for (const point of points) {
+      this.#renderPoint(point, destinations, offersByType);
     }
+  }
 
-    const blankPoint = {
-      type: destinations[0] ? offersByType[0].type : 'taxi',
-      destination: destinations[0]?.id || null,
-      dateFrom: '',
-      dateTo: '',
-      basePrice: '',
-      offers: [],
-      isFavorite: false,
+  #renderPoint(point, destinations, offersByType) {
+    let editComponent = null;
+    let pointComponent = null;
+
+    const replaceFormToPoint = () => {
+      replace(pointComponent, editComponent);
+      // В removeEventListener нельзя больше убирать обработчик, т.к. используем стрелочную и анонимку.
     };
-    render(new AddPointFormView(blankPoint, destinations, offersByType), this.pointsListComponent.getElement());
+    const replacePointToForm = () => {
+      replace(editComponent, pointComponent);
+      document.addEventListener('keydown', (evt) => escKeyDownHandler(evt, replaceFormToPoint));
+    };
 
-    for (let i = 1; i < points.length; i++) {
-      render(new PointView(points[i], destinations, offersByType), this.pointsListComponent.getElement());
-    }
+    editComponent = new EditPointFormView(point, destinations, offersByType, {
+      onFormSubmit: (evt) => {
+        evt.preventDefault();
+        replaceFormToPoint();
+      },
+      onRollupClick: replaceFormToPoint
+    });
+
+    pointComponent = new PointView(point, destinations, offersByType, {
+      onRollupClick: replacePointToForm
+    });
+
+    pointComponent.setRollupButtonClickHandler(replacePointToForm);
+    editComponent.setFormSubmitHandler((evt) => {
+      evt.preventDefault();
+      replaceFormToPoint();
+    });
+    editComponent.setRollupButtonClickHandler(replaceFormToPoint);
+
+    render(pointComponent, this.pointsListComponent.element);
+    this.editComponent = editComponent;
+    this.pointComponent = pointComponent;
   }
 }

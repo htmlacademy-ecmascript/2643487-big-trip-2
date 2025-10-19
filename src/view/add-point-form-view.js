@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function formatInputDate(dateString) {
   if (!dateString) {
@@ -106,25 +106,15 @@ function createAddPointFormTemplate(point, destinations, offersByType) {
   `;
 }
 
-export default class AddPointFormView {
+export default class AddPointFormView extends AbstractView {
   constructor(point, destinations, offersByType) {
+    super();
     this.point = point;
     this.destinations = destinations;
     this.offersByType = offersByType;
   }
 
-  getTemplate() {
+  get template() {
     return createAddPointFormTemplate(this.point, this.destinations, this.offersByType);
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

@@ -1,4 +1,4 @@
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function formatInputDate(dateString) {
   if (!dateString) {
@@ -109,25 +109,27 @@ function createEditPointFormTemplate(point, destinations, offersByType) {
   `;
 }
 
-export default class EditPointFormView {
-  constructor(point, destinations, offersByType) {
+export default class EditPointFormView extends AbstractView {
+  constructor(point, destinations, offersByType, {onFormSubmit, onRollupClick} = {}) {
+    super();
     this.point = point;
     this.destinations = destinations;
     this.offersByType = offersByType;
+    this._onFormSubmit = onFormSubmit;
+    this._onRollupClick = onRollupClick;
   }
 
-  getTemplate() {
+  get template() {
     return createEditPointFormTemplate(this.point, this.destinations, this.offersByType);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
+  setFormSubmitHandler(callback) {
+    this._onFormSubmit = callback;
+    this.element.querySelector('form')?.addEventListener('submit', this._onFormSubmit);
   }
 
-  removeElement() {
-    this.element = null;
+  setRollupButtonClickHandler(callback) {
+    this._onRollupClick = callback;
+    this.element.querySelector('.event__rollup-btn')?.addEventListener('click', this._onRollupClick);
   }
 }

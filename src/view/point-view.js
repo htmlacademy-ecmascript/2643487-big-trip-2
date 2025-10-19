@@ -1,5 +1,5 @@
-import { createElement } from '../render.js';
 import { SECONDS_IN_DAY, SECONDS_IN_HOUR, SECONDS_IN_MINUTE, MONTH_DAY_SLICE_START, MONTH_DAY_SLICE_END } from '../const.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function formatHM(dateString) {
   const date = new Date(dateString);
@@ -88,25 +88,21 @@ function createPointTemplate(point, destinations, offersByType) {
   `;
 }
 
-export default class PointView {
-  constructor(point, destinations, offersByType) {
+export default class PointView extends AbstractView {
+  constructor(point, destinations, offersByType, {onRollupClick} = {}) {
+    super();
     this.point = point;
     this.destinations = destinations;
     this.offersByType = offersByType;
+    this._onRollupClick = onRollupClick;
   }
 
-  getTemplate() {
+  get template() {
     return createPointTemplate(this.point, this.destinations, this.offersByType);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  setRollupButtonClickHandler(callback) {
+    this._onRollupClick = callback;
+    this.element.querySelector('.event__rollup-btn')?.addEventListener('click', this._onRollupClick);
   }
 }

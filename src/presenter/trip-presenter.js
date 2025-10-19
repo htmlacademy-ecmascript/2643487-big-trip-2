@@ -19,11 +19,19 @@ export default class TripPresenter {
   init() {
     render(new FilterView(), this.filterContainer);
     render(new SortView(), this.sortContainer, RenderPosition.AFTERBEGIN);
-    render(this.pointsListComponent, this.sortContainer);
 
     const points = this.model.getPoints();
     const destinations = this.model.getDestinations();
     const offersByType = this.model.getOffersByType();
+
+    if (!points.length) {
+      const emptyMsg = 'Click New Event to create your first point';
+      render(new PointsListView({ emptyMessage: emptyMsg }), this.sortContainer);
+      return;
+    }
+
+    this.pointsListComponent = new PointsListView();
+    render(this.pointsListComponent, this.sortContainer);
 
     for (const point of points) {
       this.#renderPoint(point, destinations, offersByType);

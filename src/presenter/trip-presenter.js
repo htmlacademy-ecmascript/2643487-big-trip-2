@@ -44,7 +44,6 @@ export default class TripPresenter {
 
     const replaceFormToPoint = () => {
       replace(pointComponent, editComponent);
-      // В removeEventListener нельзя больше убирать обработчик, т.к. используем стрелочную и анонимку.
     };
     const replacePointToForm = () => {
       replace(editComponent, pointComponent);

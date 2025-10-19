@@ -1,35 +1,22 @@
 
-const DESTINATION_COUNT = 6;
-const MAX_PHOTOS_PER_DEST = 6;
-const MIN_PHOTOS_PER_DEST = 2;
-const POINTS_COUNT = 4;
-const DAYS_RANGE_BEFORE = 5; // дней назад
-const DAYS_RANGE_AFTER = 5; // дней вперёд
-const MAX_POINT_DURATION_HOURS = 24;
-const MIN_POINT_PRICE = 50;
-const MAX_POINT_PRICE = 1000;
-const OFFERS_PER_POINT_MAX = 2;
-const PHOTOS_POOL_COUNT = 5;
-const MS_IN_DAY = 24 * 60 * 60 * 1000; // миллисекунд в сутках
-const MS_IN_HOUR = 60 * 60 * 1000; // миллисекунд в часе
-
-
-const types = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
-
-
-const cityNames = ['Amsterdam','Geneva','Chamonix','Moscow','New York','Saint Petersburg','London'];
-
-
-const descriptions = [
-  'A beautiful place with rich history.',
-  'Perfect city for sightseeing and culture.',
-  'Lots of attractions and great food.',
-  'Known for its nightlife and events.',
-  'Picturesque location by the water.',
-  'Amazing mountains and lakes.',
-  'Colorful streets and cozy cafes.'
-];
-
+import {
+  DESTINATION_COUNT,
+  MAX_PHOTOS_PER_DEST,
+  MIN_PHOTOS_PER_DEST,
+  POINTS_COUNT,
+  DAYS_RANGE_BEFORE,
+  DAYS_RANGE_AFTER,
+  MAX_POINT_DURATION_HOURS,
+  MIN_POINT_PRICE,
+  MAX_POINT_PRICE,
+  OFFERS_PER_POINT_MAX,
+  PHOTOS_POOL_COUNT,
+  MS_IN_DAY,
+  MS_IN_HOUR,
+  TYPES as types,
+  CITY_NAMES as cityNames,
+  DESCRIPTIONS as descriptions,
+} from '../const.js';
 
 function generateDestinations(countDest = DESTINATION_COUNT) {
   return Array.from({ length: countDest }, (_, id) => {
@@ -48,7 +35,6 @@ function generateDestinations(countDest = DESTINATION_COUNT) {
   });
 }
 
-
 const offerPool = {
   taxi:    [ { title: 'Order Uber', price: 20 }, { title: 'Upgrade to business class', price: 70 } ],
   bus:     [ { title: 'Choose seats', price: 5 } ],
@@ -61,7 +47,6 @@ const offerPool = {
   restaurant:   [ { title: 'Reserve table', price: 30 }, { title: 'Wine pairing', price: 25 } ],
 };
 
-
 function generateOffersByType(offersSource) {
   let globalId = 1;
   return Object.entries(offersSource).map(([type, offerArr]) => ({
@@ -69,7 +54,6 @@ function generateOffersByType(offersSource) {
     offers: offerArr.map((offer) => ({ id: globalId++, ...offer }))
   }));
 }
-
 
 function randomDateBetween(startDate, endDate) {
   const startTime = startDate.getTime();
@@ -84,7 +68,6 @@ function getRandomElements(array, maxCountNum) {
   const shuffled = [...array].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
-
 
 function generatePoints(amount = POINTS_COUNT, allDestinations, allOffersByType) {
   return Array.from({ length: amount }, (_, i) => {
@@ -110,6 +93,7 @@ function generatePoints(amount = POINTS_COUNT, allDestinations, allOffersByType)
     };
   });
 }
+
 export const destinations = generateDestinations(DESTINATION_COUNT);
 export const offersByType = generateOffersByType(offerPool);
 export const points = generatePoints(POINTS_COUNT, destinations, offersByType);

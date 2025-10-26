@@ -1,10 +1,8 @@
-import { render, RenderPosition, replace } from '../render.js';
+import { render, RenderPosition } from '../render.js';
 import FilterView from '../view/filter-view.js';
 import SortView from '../view/sort-view.js';
-import PointView from '../view/point-view.js';
-import EditPointFormView from '../view/edit-point-form-view.js';
 import PointsListView from '../view/points-list-view.js';
-import { escKeyDownHandler } from '../utils/dom-utils.js';
+import PointPresenter from './point-presenter.js';
 
 export default class TripPresenter {
   constructor({ filterContainer, sortContainer, model }) {
@@ -12,8 +10,7 @@ export default class TripPresenter {
     this.sortContainer = sortContainer;
     this.model = model;
     this.pointsListComponent = new PointsListView();
-    this.editComponent = null;
-    this.pointComponent = null;
+    this.pointPresenters = [];
   }
 
   init() {
@@ -34,43 +31,29 @@ export default class TripPresenter {
     render(this.pointsListComponent, this.sortContainer);
 
     for (const point of points) {
-      this.#renderPoint(point, destinations, offersByType);
+      const pointPresenter = new PointPresenter({
+        container: this.pointsListComponent.element,
+        point,
+        destinations,
+        offersByType,
+        onFavoriteToggle: this.updatePoint.bind(this),
+        onEditStart: this.resetAllToView.bind(this)
+      });
+      pointPresenter.init();
+      this.pointPresenters.push(pointPresenter);
     }
   }
 
-  #renderPoint(point, destinations, offersByType) {
-    let editComponent = null;
-    let pointComponent = null;
+  resetAllToView() {
+    this.pointPresenters.forEach((presenter) => presenter.resetView());
+  }
 
-    const replaceFormToPoint = () => {
-      replace(pointComponent, editComponent);
-    };
-    const replacePointToForm = () => {
-      replace(editComponent, pointComponent);
-      document.addEventListener('keydown', (evt) => escKeyDownHandler(evt, replaceFormToPoint));
-    };
-
-    editComponent = new EditPointFormView(point, destinations, offersByType, {
-      onFormSubmit: (evt) => {
-        evt.preventDefault();
-        replaceFormToPoint();
-      },
-      onRollupClick: replaceFormToPoint
-    });
-
-    pointComponent = new PointView(point, destinations, offersByType, {
-      onRollupClick: replacePointToForm
-    });
-
-    pointComponent.setRollupButtonClickHandler(replacePointToForm);
-    editComponent.setFormSubmitHandler((evt) => {
-      evt.preventDefault();
-      replaceFormToPoint();
-    });
-    editComponent.setRollupButtonClickHandler(replaceFormToPoint);
-
-    render(pointComponent, this.pointsListComponent.element);
-    this.editComponent = editComponent;
-    this.pointComponent = pointComponent;
+  updatePoint(updatedPoint) {
+    const idx = this.model._points.findIndex((p) => p.id === updatedPoint.id);
+    if (idx !== -1) {
+      this.model._points[idx] = updatedPoint;
+      const pointPresenter = this.pointPresenters[idx];
+      pointPresenter.update(updatedPoint);
+    }
   }
 }

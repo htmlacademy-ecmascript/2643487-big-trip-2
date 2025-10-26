@@ -35,7 +35,6 @@ export default class TripPresenter {
     const destinations = this.model.getDestinations();
     const offersByType = this.model.getOffersByType();
 
-    // Очистить предыдущий список и презентеры
     if (this.pointsListComponent.element.parentElement) {
       this.pointsListComponent.element.parentElement.removeChild(this.pointsListComponent.element);
     }
@@ -81,7 +80,7 @@ export default class TripPresenter {
 
   handleSortChange(sortType) {
     if (sortType === this.currentSortType) {
-      return; // ничего не делать, сортировка не меняется
+      return;
     }
     this.currentSortType = sortType;
     this.renderPoints();
@@ -95,7 +94,6 @@ export default class TripPresenter {
     const idx = this.model._points.findIndex((p) => p.id === updatedPoint.id);
     if (idx !== -1) {
       this.model._points[idx] = updatedPoint;
-      // Нужно пересортировать и перерисовать (ибо порядок мог измениться)
       this.renderPoints();
     }
   }

@@ -14,7 +14,7 @@ export default class PointPresenter {
     this.onFavoriteToggle = onFavoriteToggle;
     this.onEditStart = onEditStart;
     this.isEditing = false;
-    // Бинды, чтобы не терять this
+
     this.replaceFormToPoint = this.replaceFormToPoint.bind(this);
     this.replacePointToForm = this.replacePointToForm.bind(this);
   }

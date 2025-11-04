@@ -1,4 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import dayjs from 'dayjs';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 function formatInputDate(dateString) {
   if (!dateString) {
@@ -117,6 +120,8 @@ export default class EditPointFormView extends AbstractStatefulView {
     this._offersByType = offersByType;
     this._onFormSubmit = onFormSubmit;
     this._onRollupClick = onRollupClick;
+    this._flatpickrFrom = null;
+    this._flatpickrTo = null;
     this._restoreHandlers();
   }
 
@@ -127,29 +132,52 @@ export default class EditPointFormView extends AbstractStatefulView {
   _restoreHandlers() {
     this.setFormSubmitHandler(this._onFormSubmit);
     this.setRollupButtonClickHandler(this._onRollupClick);
-
     // Смена типа точки
     this.element.querySelectorAll('input[name="event-type"]').forEach((input) => {
       input.addEventListener('change', this.#onTypeChange.bind(this));
     });
     // Смена пункта назначения
     this.element.querySelector('.event__input--destination')?.addEventListener('change', this.#onDestinationChange.bind(this));
+    // flatpickr для дат
+    this.#setDatepickers();
+  }
+
+  #setDatepickers() {
+    if (this._flatpickrFrom) {
+      this._flatpickrFrom.destroy();
+    }
+    if (this._flatpickrTo) {
+      this._flatpickrTo.destroy();
+    }
+    const startInput = this.element.querySelector('#event-start-time-1');
+    const endInput = this.element.querySelector('#event-end-time-1');
+    this._flatpickrFrom = flatpickr(startInput, {
+      dateFormat: 'd/m/y H:i',
+      enableTime: true,
+      defaultDate: this._state.dateFrom,
+      onChange: ([selectedDate]) => {
+        this.updateElement({ dateFrom: dayjs(selectedDate).toISOString() });
+      }
+    });
+    this._flatpickrTo = flatpickr(endInput, {
+      dateFormat: 'd/m/y H:i',
+      enableTime: true,
+      defaultDate: this._state.dateTo,
+      onChange: ([selectedDate]) => {
+        this.updateElement({ dateTo: dayjs(selectedDate).toISOString() });
+      }
+    });
   }
 
   #onTypeChange(evt) {
     const newType = evt.target.value;
-    this.updateElement({
-      type: newType,
-      offers: [] // сбрасываем офферы при смене типа
-    });
+    this.updateElement({ type: newType, offers: [] });
   }
 
   #onDestinationChange(evt) {
     const newDestName = evt.target.value;
     const foundDest = this._destinations.find((d) => d.name === newDestName);
-    this.updateElement({
-      destination: foundDest ? foundDest.id : null
-    });
+    this.updateElement({ destination: foundDest ? foundDest.id : null });
   }
 
   setFormSubmitHandler(callback) {

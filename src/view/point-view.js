@@ -1,21 +1,24 @@
 import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
-dayjs.extend(duration);
-import { MONTH_DAY_SLICE_START, MONTH_DAY_SLICE_END } from '../const.js';
+import durationPlugin from 'dayjs/plugin/duration';
+dayjs.extend(durationPlugin);
 import AbstractView from '../framework/view/abstract-view.js';
 
 function formatHM(dateString) {
   return dayjs(dateString).format('HH:mm');
 }
 function getPointDuration(dateFrom, dateTo) {
-  if (!dateFrom || !dateTo) return '';
-  const dur = dayjs(dateTo).diff(dayjs(dateFrom));
-  const d = dayjs.duration(dur);
-  const days = d.days();
-  const hours = d.hours();
-  const minutes = d.minutes();
-  if (d.asMinutes() < 60) return `${minutes}M`;
-  if (d.asHours() < 24) {
+  if (!dateFrom || !dateTo) {
+    return '';
+  }
+  const durationMs = dayjs(dateTo).diff(dayjs(dateFrom));
+  const dur = dayjs.duration(durationMs);
+  const days = dur.days();
+  const hours = dur.hours();
+  const minutes = dur.minutes();
+  if (dur.asMinutes() < 60) {
+    return `${minutes}M`;
+  }
+  if (dur.asHours() < 24) {
     return `${String(hours).padStart(2,'0')}H ${String(minutes).padStart(2,'0')}M`;
   }
   return `${String(days).padStart(2,'0')}D ${String(hours).padStart(2,'0')}H ${String(minutes).padStart(2,'0')}M`;
@@ -31,7 +34,7 @@ function createPointTemplate(point, destinations, offersByType) {
   // Форматы дат с помощью dayjs
   const dateFrom = formatHM(point.dateFrom);
   const dateTo = formatHM(point.dateTo);
-  const duration = getPointDuration(point.dateFrom, point.dateTo);
+  const durationStr = getPointDuration(point.dateFrom, point.dateTo);
   const dateStringMD = dayjs(point.dateFrom).format('DD/MM/YY'); // формат для колонки 'Day'
   return `
     <li class="trip-events__item">
@@ -47,7 +50,7 @@ function createPointTemplate(point, destinations, offersByType) {
             &mdash;
             <time class="event__end-time">${dateTo}</time>
           </p>
-          <p class="event__duration">${duration}</p>
+          <p class="event__duration">${durationStr}</p>
         </div>
         <p class="event__price">
           &euro;&nbsp;<span class="event__price-value">${point.basePrice}</span>

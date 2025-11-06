@@ -1,51 +1,41 @@
-import { SECONDS_IN_DAY, SECONDS_IN_HOUR, SECONDS_IN_MINUTE, MONTH_DAY_SLICE_START, MONTH_DAY_SLICE_END } from '../const.js';
+import dayjs from 'dayjs';
+import durationPlugin from 'dayjs/plugin/duration';
+dayjs.extend(durationPlugin);
 import AbstractView from '../framework/view/abstract-view.js';
 
 function formatHM(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  return dayjs(dateString).format('HH:mm');
 }
-
 function getPointDuration(dateFrom, dateTo) {
   if (!dateFrom || !dateTo) {
     return '';
   }
-  const start = new Date(dateFrom);
-  const end = new Date(dateTo);
-  let diff = (end - start) / 1000;
-
-  const days = Math.floor(diff / SECONDS_IN_DAY);
-  diff -= days * SECONDS_IN_DAY;
-  const hours = Math.floor(diff / SECONDS_IN_HOUR);
-  diff -= hours * SECONDS_IN_HOUR;
-  const minutes = Math.floor(diff / SECONDS_IN_MINUTE);
-
-  let out = '';
-  if (days > 0) {
-    out += `${String(days).padStart(2, '0')}D `;
+  const durationMs = dayjs(dateTo).diff(dayjs(dateFrom));
+  const dur = dayjs.duration(durationMs);
+  const days = dur.days();
+  const hours = dur.hours();
+  const minutes = dur.minutes();
+  if (dur.asMinutes() < 60) {
+    return `${minutes}M`;
   }
-  if (days > 0 || hours > 0) {
-    out += `${String(hours).padStart(2, '0')}H `;
+  if (dur.asHours() < 24) {
+    return `${String(hours).padStart(2,'0')}H ${String(minutes).padStart(2,'0')}M`;
   }
-  out += `${String(minutes).padStart(2, '0')}M`;
-  return out.trim();
+  return `${String(days).padStart(2,'0')}D ${String(hours).padStart(2,'0')}H ${String(minutes).padStart(2,'0')}M`;
 }
 
 function createPointTemplate(point, destinations, offersByType) {
-
   const safeDestinations = Array.isArray(destinations) ? destinations : [];
   const safeOffersByType = Array.isArray(offersByType) ? offersByType : [];
-
   const destinationObj = safeDestinations.find((dest) => dest.id === point.destination);
   const city = destinationObj ? destinationObj.name : '';
   const offersForType = safeOffersByType.find((o) => o.type === point.type)?.offers || [];
   const selectedOffers = offersForType.filter((offer) => point.offers.includes(offer.id));
-
+  // Форматы дат с помощью dayjs
   const dateFrom = formatHM(point.dateFrom);
   const dateTo = formatHM(point.dateTo);
-  const duration = getPointDuration(point.dateFrom, point.dateTo);
-  const dateStringMD = point.dateFrom.slice(MONTH_DAY_SLICE_START, MONTH_DAY_SLICE_END);
-
+  const durationStr = getPointDuration(point.dateFrom, point.dateTo);
+  const dateStringMD = dayjs(point.dateFrom).format('DD/MM/YY'); // формат для колонки 'Day'
   return `
     <li class="trip-events__item">
       <div class="event">
@@ -60,7 +50,7 @@ function createPointTemplate(point, destinations, offersByType) {
             &mdash;
             <time class="event__end-time">${dateTo}</time>
           </p>
-          <p class="event__duration">${duration}</p>
+          <p class="event__duration">${durationStr}</p>
         </div>
         <p class="event__price">
           &euro;&nbsp;<span class="event__price-value">${point.basePrice}</span>
